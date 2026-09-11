@@ -106,7 +106,6 @@ Escaneie o QR code com o Expo Go.
 🚧 Em desenvolvimento — versão de apresentação acadêmica.
 
 ## Participação
-|---|---|
-| Monique Francielly | Backend — Cronômetro, Ranking, Resumos, Lembretes, Chamadas, Notificações e Integração Frontend |
-| Eduardo Duarte | Backend — Autenticação, Grupos, Firebase e Segurança |
-| Pietra Bezerra | Frontend — Telas e Design |
+- | Monique Francielly | Backend — Cronômetro, Ranking, Resumos, Lembretes, Chamadas, Notificações e Integração Frontend |
+- | Eduardo Duarte | Backend — Autenticação, Grupos, Firebase e Segurança |
+- | Pietra Bezerra | Frontend — Telas e Design |
