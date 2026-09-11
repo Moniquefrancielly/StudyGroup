@@ -37,19 +37,19 @@ O StudyGroup permite que estudantes criem e participem de grupos de estudo com f
 
 ---
 ## 📁 Estrutura do projeto
+```
 StudyGroup/
 ├── backend/
-│ └── src/
-│ ├── config/ # Firebase Admin
-│ ├── controllers/ # Lógica das requisições
-│ ├── middlewares/ # Autenticação e permissões
-│ ├── routes/ # Rotas da API
-│ └── services/ # Regras de negócio
+│   └── src/
+│       ├── config/         # Firebase Admin
+│       ├── controllers/    # Lógica das requisições
+│       ├── middlewares/    # Autenticação e permissões
+│       ├── routes/         # Rotas da API
+│       └── services/       # Regras de negócio
 └── frontend/
-├── app/ # Telas (Expo Router)
-└── services/ # Comunicação com API
-
----
+    ├── app/                # Telas (Expo Router)
+    └── services/           # Comunicação com API
+```
 
 ## ⚙️ Como rodar
 
@@ -106,4 +106,6 @@ Escaneie o QR code com o Expo Go.
 🚧 Em desenvolvimento — versão de apresentação acadêmica.
 
 ## Participação
-| Monique Francielly | Backend — Cronômetro, Ranking, Resumos, Lembretes, Chamadas e Notificações | Integração de Telas | Integração de API de ligações
+| Monique Francielly | Backend — Cronômetro, Ranking, Resumos, Lembretes, Chamadas e Notificações | Integração - Telas e API | 
+| Eduardo Duarte | Backend — Autenticação, Grupos, Firebase, Segurança |
+| Pietra Bezerra | Frontend — Telas e Design |
