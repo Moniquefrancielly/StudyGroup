@@ -1,6 +1,7 @@
 const {
   createGroup, joinGroup, leaveGroup, removeUser, transferAdmin,
-  generateInvite, joinByInvite, updateGroupName, getGroupMembers
+  generateInvite, joinByInvite, updateGroupName, getGroupMembers, 
+  approveRequest, rejectRequest, deleteGroup, getMyGroups, getJoinRequests
 } = require("../services/groupService");
 
 
@@ -159,10 +160,41 @@ const reject = async (req, res) => {
 // 🔹 DELETAR GRUPO (ADMIN ONLY)
 
 const removeGroup = async (req, res) => {
+  console.log("DELETE GROUP CHAMADO");
+  console.log("BODY:", req.body);
+  console.log("USER:", req.user);
+
   try {
     const adminId = req.user.uid;
     const { groupId } = req.body;
+
     const result = await deleteGroup(adminId, groupId);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("ERRO DELETE GROUP:", error);
+
+    return res.status(400).json({
+      error: error.message,
+    });
+  }
+};
+  
+const myGroups = async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const result = await getMyGroups(userId);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+  const listRequests = async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const { groupId } = req.params;
+    const result = await getJoinRequests(userId, groupId);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -171,5 +203,6 @@ const removeGroup = async (req, res) => {
 
 module.exports = {
   create, join, leave, remove, transfer,
-  invite, joinViaInvite, updateGroup, listMembers
+  invite, joinViaInvite, updateGroup, listMembers,
+  approve, reject, removeGroup, myGroups, listRequests
 };

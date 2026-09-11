@@ -1,4 +1,4 @@
-const { db } = require("../config/firebaseAdmin");
+const { admin, db } = require("../config/firebaseAdmin");
 const { v4: uuidv4 } = require("uuid");
 const { sendToUser, sendToGroup } = require("./notificationService");
 
@@ -139,10 +139,9 @@ const transferAdmin = async (adminId, groupId, newAdminId) => {
 
 // 🔻 EXPORTS
 
-const generateInvite = async (adminId, groupId) => {
+const generateInvite = async (userId, groupId) => {
   const groupDoc = await db.collection("groups").doc(groupId).get();
   if (!groupDoc.exists) throw new Error("Grupo não existe");
-  if (groupDoc.data().adminId !== adminId) throw new Error("Apenas admin pode gerar convite");
 
   const inviteCode = uuidv4().slice(0, 8).toUpperCase();
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -150,7 +149,7 @@ const generateInvite = async (adminId, groupId) => {
   await db.collection("invites").add({
     groupId,
     code: inviteCode,
-    createdBy: adminId,
+    createdBy: userId,
     expiresAt,
     used: false,
   });
@@ -184,6 +183,7 @@ const joinByInvite = async (userId, inviteCode) => {
     status: "pending",
     createdAt: new Date(),
   });
+  console.log("solicitação criada para groupId:", invite.groupId);
 
   // 🔹 Notifica o admin
   const groupDoc = await db.collection("groups").doc(invite.groupId).get();
@@ -309,14 +309,85 @@ const getGroupMembers = async (userId, groupId) => {
     .where("groupId", "==", groupId)
     .get();
 
-  return snap.docs.map(doc => ({
-    userId: doc.data().userId,
-    role: doc.data().role,
+  const members = await Promise.all(snap.docs.map(async (doc) => {
+    const memberId = doc.data().userId;
+    let displayName = memberId;
+    let email = "";
+    try {
+      const userRecord = await admin.auth().getUser(memberId);
+      displayName = userRecord.displayName || userRecord.email || memberId;
+      email = userRecord.email || "";
+    } catch (e) {}
+
+    return {
+      userId: memberId,
+      role: doc.data().role,
+      name: displayName,
+      email,
+    };
+  }));
+
+  return members;
+};
+
+const getMyGroups = async (userId) => {
+  const snap = await db.collection("groupMembers")
+    .where("userId", "==", userId)
+    .get();
+
+  if (snap.empty) return [];
+
+  const groups = await Promise.all(snap.docs.map(async (doc) => {
+    const { groupId, role } = doc.data();
+    const groupDoc = await db.collection("groups").doc(groupId).get();
+    if (!groupDoc.exists) return null;
+
+    const membersSnap = await db.collection("groupMembers")
+      .where("groupId", "==", groupId)
+      .get();
+    const memberCount = membersSnap.size;
+
+    return { ...groupDoc.data(), role, memberCount };
+  }));
+
+  return groups.filter(g => g !== null);
+};
+
+const getJoinRequests = async (userId, groupId) => {
+  const groupDoc = await db.collection("groups").doc(groupId).get();
+  if (!groupDoc.exists) throw new Error("Grupo não existe");
+  if (groupDoc.data().adminId !== userId) throw new Error("Apenas admin pode ver solicitações");
+
+  const snap = await db.collection("joinRequests")
+    .where("groupId", "==", groupId)
+    .where("status", "==", "pending")
+    .get();
+
+  return Promise.all(snap.docs.map(async (doc) => {
+    const requestUserId = doc.data().userId;
+    let displayName = requestUserId;
+    let userEmail = "";
+    try {
+      const userRecord = await admin.auth().getUser(requestUserId);
+      displayName = userRecord.displayName || userRecord.email || requestUserId;
+      userEmail = userRecord.email || "";
+    } catch (e) {}
+
+    return {
+      id: doc.id,
+      requestId: doc.id,
+      userId: requestUserId,
+      userName: displayName,
+      userEmail,
+      groupId: doc.data().groupId,
+      createdAt: doc.data().createdAt,
+    };
   }));
 };
 
 module.exports = {
   createGroup, joinGroup, leaveGroup, removeUser, transferAdmin,
   generateInvite, joinByInvite, approveRequest, rejectRequest,
-  deleteGroup, updateGroupName, getGroupMembers
+  deleteGroup, updateGroupName, getGroupMembers, getMyGroups,
+  getJoinRequests
 };

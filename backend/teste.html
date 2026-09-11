@@ -14,7 +14,7 @@
 
     firebase.initializeApp(firebaseConfig);
 
-    firebase.auth().signInWithEmailAndPassword("eduardosduarte31@gmail.com", "edu123")
+    firebase.auth().signInWithEmailAndPassword("moniquesantos@alunos.afya.com.br")
       .then(async (userCredential) => {
         const token = await userCredential.user.getIdToken();
         console.log("TOKEN:", token);

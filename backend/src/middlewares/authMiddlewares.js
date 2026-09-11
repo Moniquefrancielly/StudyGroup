@@ -10,9 +10,12 @@ const verifyToken = async (req, res, next) => {
 
     const decoded = await admin.auth().verifyIdToken(token);
 
-     if (!decoded.email_verified) {
-       return res.status(403).json({ error: "Email não verificado" });
-     }
+    console.log("EMAIL VERIFIED:", decoded.email_verified);
+    console.log(decoded);
+
+   // if (!decoded.email_verified) {
+    //  return res.status(403).json({ error: "Email não verificado" });
+     //}
 
     req.user = decoded;
     next();

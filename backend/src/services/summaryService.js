@@ -1,4 +1,4 @@
-const { db } = require("../config/firebaseAdmin");
+const { admin, db } = require("../config/firebaseAdmin");
 const { sendToUser } = require("./notificationService");
 
 
@@ -43,7 +43,18 @@ const listSummaries = async (userId, groupId) => {
     .where("groupId", "==", groupId)
     .get();
 
-  return snap.docs.map(doc => ({ summaryId: doc.id, ...doc.data() }));
+  const resumos = await Promise.all(snap.docs.map(async doc => {
+    const data = doc.data();
+    let authorName = "Usuário desconhecido";
+  try {
+    const userRecord = await admin.auth().getUser(data.userId);
+    authorName = userRecord.displayName || userRecord.email || "Usuário desconhecido";
+  } catch (e) {}
+    return { summaryId: doc.id, ...data, authorName };
+  }));
+
+
+  return resumos;
 };
 
 // 🔹 VER RESUMO ESPECÍFICO
@@ -72,9 +83,14 @@ const getSummary = async (userId, summaryId) => {
     .where("summaryId", "==", summaryId)
     .get();
 
-  const comments = commentsSnap.docs.map(doc => ({
-    commentId: doc.id,
-    ...doc.data()
+  const comments = await Promise.all(commentsSnap.docs.map(async doc => {
+    const data = doc.data();
+    let authorName = "Usuário desconhecido";
+    try {
+      const userRecord = await admin.auth().getUser(data.userId);
+      authorName = userRecord.displayName || userRecord.email || "Usuário desconhecido";
+    } catch (e) {}
+    return { commentId: doc.id, ...data, authorName };
   }));
 
   return { summaryId: doc.id, ...summary, comments };

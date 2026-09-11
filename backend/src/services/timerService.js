@@ -22,7 +22,8 @@ const startSession = async (userId, groupId) => {
     .get();
 
   if (!activeSnap.empty) {
-    throw new Error("Já existe uma sessão ativa nesse grupo");
+    const doc = activeSnap.docs[0];
+    await doc.ref.update({ active: false, endTime: new Date()});
   }
 
   const session = {

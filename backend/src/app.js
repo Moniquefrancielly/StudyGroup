@@ -9,6 +9,7 @@ const rankingRoutes = require("./routes/rankingRoutes");
 const summaryRoutes = require("./routes/summaryRoutes");
 const reminderRoutes = require("./routes/reminderRoutes");
 const callRoutes = require("./routes/callRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
 const app = express();
 
@@ -28,5 +29,6 @@ app.use("/ranking", rankingRoutes);
 app.use("/summary", summaryRoutes);
 app.use("/reminder", reminderRoutes);
 app.use("/call", callRoutes);
+app.use("/message", messageRoutes);
 
 module.exports = app;
